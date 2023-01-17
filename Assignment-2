@@ -1,0 +1,81 @@
+int motor = 4;
+int greenPin = 5;
+int bluePin = 6;
+int redPin = 7;
+int button = 8;
+int trigpin = 11;
+int echopin = 10;
+int buzzer = 2;
+
+void setup() {
+	pinMode(button, INPUT);
+	pinMode(motor, OUTPUT);
+	pinMode(trigpin, OUTPUT);
+  	pinMode(redPin, OUTPUT);
+	pinMode(greenPin, OUTPUT);
+	pinMode(bluePin, OUTPUT);
+	Serial.begin (9600);
+}
+
+void loop() {
+	long x, cm;
+	int buttonstate = digitalRead(button);
+	if (buttonstate == 1) {
+      	cm = microsecondsToCentimeters(x);
+		delay(1000);
+		Serial.print("cm= ");
+		Serial.println(cm);
+        if (cm < 20 || cm > 300) {
+          	setColor(0, 255, 255);
+          	digitalWrite(motor, LOW);
+          	Serial.println("Error! Out of range");
+          	while(1) {
+              	tone(buzzer, 100);
+              	delay(500);
+              	noTone(buzzer);
+              	cm = microsecondsToCentimeters(x);
+              	if (cm > 20 && cm < 300)
+                  	break;
+          	}
+		} else if (cm <= 40 || cm >= 250){
+          	setColor(0, 0, 255);
+			digitalWrite(motor, HIGH);
+          	Serial.println("Caution!!");
+          	while(1) {
+              	cm = microsecondsToCentimeters(x);
+              	if (cm > 40 && cm < 250)
+                  	break;
+              	if (cm < 20 || cm > 300)
+                  	break;
+          	}
+		} else if (cm > 40 && cm < 250){
+          	setColor(255, 0, 255);
+			digitalWrite(motor, HIGH);
+          	Serial.println("Within Operating Range");
+          	while(1) {
+              	cm = microsecondsToCentimeters(x);
+              	if (cm <= 40 || cm >= 250)
+                  	break;
+          	}
+        }
+	}
+}
+
+double microsecondsToCentimeters(long duration) {
+	digitalWrite(trigpin, LOW);
+	delayMicroseconds(2);
+	digitalWrite(trigpin, HIGH);
+	delayMicroseconds(10);
+	digitalWrite(trigpin, LOW);
+	duration = pulseIn(echopin, HIGH);
+	return duration / 28.6 / 2;
+}
+
+void setColor(int red, int green, int blue) {
+	red = 255 - red;
+	green = 255 - green;
+	blue = 255 - blue;
+	analogWrite(redPin, red);
+	analogWrite(greenPin, green);
+	analogWrite(bluePin, blue);
+}
