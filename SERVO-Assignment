@@ -1,0 +1,58 @@
+#include <Servo.h>
+
+int servoPin = 9;
+Servo myservo;
+int value;
+double angle;
+
+int button = 8;
+int greenPin = 5;
+int bluePin = 6;
+int redPin = 7;
+
+void setup() {
+  	Serial.begin(9600);
+	myservo.attach(servoPin);
+  	pinMode(redPin, OUTPUT);
+	pinMode(greenPin, OUTPUT);
+	pinMode(bluePin, OUTPUT);
+}
+
+void loop() {
+  	int buttonstate = digitalRead(button);
+  	if (buttonstate == 1) {
+      	value = analogRead(A0);
+  		angle = map(value, 0, 1023, 0, 180);
+		Serial.println(angle);
+		myservo.write(angle);
+      
+      	if (angle < 20) {
+      		setColor(169, 169, 169);
+    	} else if (angle > 20 && angle <= 60){
+      		setColor(255, 0, 0);
+    	} else if (angle > 60 && angle <= 100){
+      		setColor(0, 0, 255);
+    	} else if (angle > 100 && angle <= 130){
+      		setColor(255, 255, 0);
+    	} else if (angle > 130 && angle < 180){
+      		setColor(0, 255, 0);
+    	} else {
+      		setColor(0, 0, 0);
+    	}
+    } else {
+      	myservo.write(0);
+      	setColor(0, 0, 0);
+    }
+	delay(15);
+}
+
+void setColor(int red, int green, int blue) {
+  	#ifdef COMMON_ANODE
+	red = 255 - red;
+	green = 255 - green;
+	blue = 255 - blue;
+	#endif
+	analogWrite(redPin, red);
+	analogWrite(greenPin, green);
+	analogWrite(bluePin, blue);
+}
